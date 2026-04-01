@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { CATEGORIES } from '../data/dishes'
 import useDishes from '../hooks/useDishes'
@@ -19,11 +19,14 @@ const pageVariants = {
 
 export default function MenuPage() {
   const navigate = useNavigate()
-  const { dishes } = useDishes()
+  const { dishes, addDish } = useDishes()
   const { cartItems, totalCount, addItem, removeItem, clearCart, getQuantity } = useCart()
   const [activeCategory, setActiveCategory] = useState('cold')
   const [showModal, setShowModal] = useState(false)
   const [orderSummary, setOrderSummary] = useState('')
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [newDishName, setNewDishName] = useState('')
+  const [newDishEmoji, setNewDishEmoji] = useState('🍽️')
   const tabsRef = useRef(null)
 
   const filteredDishes = dishes.filter((d) => d.category === activeCategory)
@@ -52,6 +55,23 @@ export default function MenuPage() {
     navigate('/')
   }
 
+  const handleAddCustomDish = () => {
+    if (!newDishName.trim()) {
+      toast('请输入菜名~', { icon: '🙏' })
+      return
+    }
+    addDish({
+      name: newDishName.trim(),
+      category: activeCategory,
+      description: '自定义菜品',
+      emoji: newDishEmoji || '🍽️',
+    })
+    toast(`已添加 ${newDishName}`, { icon: '✅' })
+    setNewDishName('')
+    setNewDishEmoji('🍽️')
+    setShowAddForm(false)
+  }
+
   return (
     <motion.div
       variants={pageVariants}
@@ -66,26 +86,26 @@ export default function MenuPage() {
       <div className="sticky top-0 z-40" style={{ background: 'rgba(255,248,240,0.92)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
         <div className="flex items-center px-4 py-3">
           <BackButton />
-          <h1 className="text-lg font-bold" style={{ color: '#4A3228' }}>选菜单</h1>
+          <h1 className="text-base font-bold" style={{ color: '#4A3228' }}>选菜单</h1>
         </div>
 
         {/* Category tabs */}
         <div
           ref={tabsRef}
-          className="flex gap-2.5 px-4 pb-3 overflow-x-auto scrollbar-hide"
+          className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-hide"
         >
           {CATEGORIES.map((cat) => (
             <motion.button
               key={cat.key}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveCategory(cat.key)}
-              className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
+              className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
               style={
                 activeCategory === cat.key
                   ? {
                       background: 'linear-gradient(135deg, #FF9A5C, #FF6B6B)',
                       color: '#fff',
-                      boxShadow: '0 3px 12px rgba(255, 107, 107, 0.3)',
+                      boxShadow: '0 2px 10px rgba(255, 107, 107, 0.3)',
                     }
                   : {
                       background: '#fff',
@@ -112,18 +132,103 @@ export default function MenuPage() {
             onRemove={removeItem}
           />
         ))}
+
+        {/* Add custom dish card */}
+        <motion.button
+          layout
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowAddForm(true)}
+          className="bg-white/60 rounded-2xl p-3 flex flex-col items-center justify-center text-center min-h-[130px]"
+          style={{
+            border: '2px dashed rgba(255, 154, 92, 0.3)',
+          }}
+        >
+          <span className="text-2xl mb-1" style={{ color: '#FFa070' }}>+</span>
+          <span className="text-xs font-medium" style={{ color: '#C0956E' }}>想吃别的</span>
+        </motion.button>
       </div>
 
       {/* Empty state */}
       {filteredDishes.length === 0 && (
-        <div className="text-center py-16" style={{ color: '#A08060' }}>
-          <p className="text-4xl mb-3">🍽️</p>
-          <p>这个分类还没有菜品哦~</p>
+        <div className="text-center py-10" style={{ color: '#A08060' }}>
+          <p className="text-3xl mb-2">🍽️</p>
+          <p className="text-sm">这个分类还没有菜品哦~</p>
         </div>
       )}
 
       {/* Cart bar */}
       <CartBar cartItems={cartItems} totalCount={totalCount} onSubmit={handleSubmit} />
+
+      {/* Add custom dish form */}
+      <AnimatePresence>
+        {showAddForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center"
+            style={{ background: 'rgba(74, 50, 40, 0.4)', backdropFilter: 'blur(4px)' }}
+            onClick={() => setShowAddForm(false)}
+          >
+            <motion.div
+              initial={{ y: 250 }}
+              animate={{ y: 0 }}
+              exit={{ y: 250 }}
+              transition={{ type: 'spring', damping: 25 }}
+              className="bg-white rounded-t-3xl p-5 w-full max-w-lg"
+              style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-base font-bold mb-4" style={{ color: '#4A3228' }}>
+                添加想吃的菜
+              </h3>
+
+              <div className="flex gap-3 mb-4">
+                <input
+                  type="text"
+                  value={newDishEmoji}
+                  onChange={(e) => setNewDishEmoji(e.target.value)}
+                  className="w-14 h-11 rounded-xl text-center text-xl focus:outline-none"
+                  style={{ background: '#FFF8F0', border: '1.5px solid #FFE0D0' }}
+                  placeholder="🍽️"
+                />
+                <input
+                  type="text"
+                  value={newDishName}
+                  onChange={(e) => setNewDishName(e.target.value)}
+                  placeholder="输入菜名，如：红烧排骨"
+                  className="flex-1 h-11 px-4 rounded-xl text-sm focus:outline-none"
+                  style={{ background: '#FFF8F0', color: '#4A3228', border: '1.5px solid #FFE0D0' }}
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+                  style={{ background: '#FFF0ED', color: '#8B7355' }}
+                >
+                  取消
+                </button>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleAddCustomDish}
+                  className="flex-1 py-2.5 rounded-xl text-sm text-white font-bold"
+                  style={{
+                    background: 'linear-gradient(135deg, #FF9A5C, #FF6B6B)',
+                    boxShadow: '0 3px 12px rgba(255, 107, 107, 0.3)',
+                  }}
+                >
+                  添加
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Submit success modal */}
       {showModal && (
@@ -144,7 +249,7 @@ export default function MenuPage() {
           >
             <div className="text-center mb-4">
               <span className="text-4xl">💕</span>
-              <h2 className="text-lg font-bold mt-2" style={{ color: '#4A3228' }}>
+              <h2 className="text-base font-bold mt-2" style={{ color: '#4A3228' }}>
                 已告诉大厨啦~
               </h2>
             </div>
@@ -160,7 +265,7 @@ export default function MenuPage() {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={handleCopy}
-                className="w-full py-3 rounded-2xl text-white font-bold"
+                className="w-full py-3 rounded-2xl text-white font-bold text-sm"
                 style={{
                   background: 'linear-gradient(135deg, #FF9A5C, #FF6B6B)',
                   boxShadow: '0 4px 16px rgba(255, 107, 107, 0.35)',
@@ -170,7 +275,7 @@ export default function MenuPage() {
               </motion.button>
               <button
                 onClick={handleCloseModal}
-                className="w-full py-3 rounded-2xl font-medium"
+                className="w-full py-2.5 rounded-2xl font-medium text-sm"
                 style={{ background: '#FFF0ED', color: '#8B7355' }}
               >
                 返回首页
