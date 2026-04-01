@@ -35,7 +35,7 @@ export default function WelcomePage() {
       animate="animate"
       exit="exit"
       transition={{ duration: 0.3 }}
-      className="min-h-screen flex flex-col items-center px-6 pt-12 pb-10 relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden"
       style={{
         background: 'linear-gradient(160deg, #FFF8F0 0%, #FFE8E0 40%, #FFD4CC 70%, #FFB4B4 100%)',
       }}
@@ -49,7 +49,7 @@ export default function WelcomePage() {
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5, type: 'spring' }}
-        className="w-56 h-56 rounded-3xl overflow-hidden mb-8 flex-shrink-0"
+        className="w-52 h-52 rounded-3xl overflow-hidden flex-shrink-0"
         style={{
           border: '5px solid rgba(255,255,255,0.85)',
           boxShadow: '0 10px 40px rgba(255,107,107,0.2), 0 4px 12px rgba(139,115,85,0.1)',
@@ -67,7 +67,7 @@ export default function WelcomePage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="font-handwriting text-3xl text-center mb-10 select-none"
+        className="font-handwriting text-3xl text-center mt-8 mb-10 select-none"
         style={{ color: '#4A3228', WebkitTouchCallout: 'none' }}
         onMouseDown={handlePressStart}
         onMouseUp={handlePressEnd}
@@ -84,7 +84,7 @@ export default function WelcomePage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="flex flex-col gap-5 w-full max-w-xs"
+        className="flex flex-col gap-4 w-full max-w-xs"
       >
         <motion.button
           whileTap={{ scale: 0.96 }}
@@ -119,7 +119,7 @@ export default function WelcomePage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="mt-auto pt-8 text-sm text-center"
+        className="mt-10 text-sm text-center"
         style={{ color: '#B08968' }}
       >
         {quote}
